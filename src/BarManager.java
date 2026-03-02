@@ -126,34 +126,70 @@ public class BarManager {
     //update a regular's monthly visit, average spend, or favorite drink
     public void editRegular() {
 
-        if (regulars.isEmpty()) {
-            System.out.println("No customers to edit.\n");
-            return;
-        }
-
-        System.out.println("Enter Customer ID to edit:");
-        int id = getValidInt();
+        System.out.println("Enter Customer ID you wish to edit:");
+        int idEntry = getValidInt();
+        boolean found = false;
 
         for (BarRegular r : regulars) {
-            if (r.getCustomerId() == id) {
 
-                System.out.println("Enter new monthly visits:");
-                int visits = getValidInt();
+            if (r.getCustomerId() == idEntry) {
 
-                System.out.println("Enter new monthly average spend:");
-                double spend = getValidDouble();
+                found = true;
 
-                System.out.println("Enter new favorite drink");
-                String drink = scnr.next();
+                System.out.println("1. Edit favorite drink");
+                System.out.println("2. Edit monthly visits");
+                System.out.println("3. Edit monthly average spend");
 
-                r.updateCustomer(visits, spend, drink);
+                while (!scnr.hasNextInt()) {
+                    System.out.println("Enter 1–3:");
+                    scnr.next();
+                }
+                int editChoice = getValidInt();
 
-                System.out.println("Bar Regular updated successfully.\n");
-                return;
+                scnr.nextLine(); // clear buffer
+
+                if (editChoice == 1) {
+
+                    System.out.println("Enter new favorite drink:");
+                    String newDrink = scnr.nextLine();
+
+                    r.setFavoriteDrink(newDrink);
+                    System.out.println("Favorite drink updated.\n");
+                }
+
+                else if (editChoice == 2) {
+
+                    System.out.println("Enter new monthly visits:");
+                    int newVisits = getValidInt();
+
+                    r.setVisitFrequencyMonthly(newVisits);
+                    System.out.println("Monthly visits updated.\n");
+                }
+
+                else if (editChoice == 3) {
+
+                    System.out.println("Enter new monthly average spend:");
+                    double newSpend = getValidDouble();
+                    while (newSpend < 0) {
+                        System.out.println("Spend cannot be negative:");
+                        newSpend = scnr.nextDouble();
+                    }
+
+                    r.setAverageSpendMonthly(newSpend);
+                    System.out.println("Monthly spend updated.\n");
+                }
+
+                else {
+                    System.out.println("Invalid menu option.\n");
+                }
+
+                break;
             }
         }
 
-        System.out.println("Customer not found.\n");
+        if (!found) {
+            System.out.println("Customer ID not found.\n");
+        }
     }
 
     // load from file method

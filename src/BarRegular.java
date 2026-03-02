@@ -7,6 +7,7 @@ public class BarRegular {
     private double averageSpendMonthly;
     private boolean vipStatus;
 
+
     public BarRegular(int customerId, String name, String favoriteDrink,
                       int visitFrequencyMonthly, double averageSpendMonthly) {
 
@@ -23,14 +24,23 @@ public class BarRegular {
         vipStatus = (visitFrequencyMonthly > 25 ||
                 (visitFrequencyMonthly * averageSpendMonthly) > 1000);
     }
-//update customer alters bar regular data, need it in here so we can recalculate vip status
-    public void updateCustomer(int visits, double spend, String drink) {
-        this.visitFrequencyMonthly = visits;
-        this.averageSpendMonthly = spend;
+
+    //setters for updating customers
+    public void setFavoriteDrink(String drink) {
         this.favoriteDrink = drink;
+    }
+
+    public void setVisitFrequencyMonthly(int visits) {
+        this.visitFrequencyMonthly = visits;
         calculateVipStatus();
     }
 
+    public void setAverageSpendMonthly(double spend) {
+        this.averageSpendMonthly = spend;
+        calculateVipStatus();
+    }
+
+    //getters
     public int getCustomerId() { return customerId; }
     public String getName() { return name; }
     public String getFavoriteDrink() { return favoriteDrink; }
@@ -38,6 +48,8 @@ public class BarRegular {
     public double getAverageSpendMonthly() { return averageSpendMonthly; }
     public boolean getVipStatus() { return vipStatus; }
 
+
+    //display menu so we can call it whenever
     public void display() {
         System.out.println("ID: " + customerId);
         System.out.println("Name: " + name);
