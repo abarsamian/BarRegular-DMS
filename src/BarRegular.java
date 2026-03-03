@@ -22,7 +22,7 @@ public class BarRegular {
 //vip status method is in here because every bar regular has one
     private void calculateVipStatus() {
         vipStatus = (visitFrequencyMonthly > 25 ||
-                (visitFrequencyMonthly * averageSpendMonthly) > 1000);
+                (averageSpendMonthly) > 1000);
     }
 
     //setters for updating customers

@@ -30,14 +30,15 @@ public class BarManager {
     public void addRegular() {
 
         System.out.println("Customer ID:");
-        int id = getValidInt();
 
-
-//validate input of id
-        while (id < 1000000 || id > 9999999) {
-            System.out.println("ID must be 7 digits:");
-            id = getValidInt();
+        //validate input of id
+        while (!scnr.hasNextInt()) {
+            System.out.println("Invalid input. Please enter a 7-digit number:");
+            scnr.next();
         }
+       int id = scnr.nextInt();
+
+
         //need to prevent duplicate id
         for (BarRegular r : regulars) {
             if (r.getCustomerId() == id) {
@@ -84,7 +85,7 @@ public class BarManager {
 
         for (BarRegular r : regulars) {
             if (r.getVipStatus()) {
-                //if wehn we call the vip status for this customer, it displays and is true
+                //if when we call the vip status for this customer, it displays and is true
                 r.display();
                 found = true;
             }
@@ -170,10 +171,6 @@ public class BarManager {
 
                     System.out.println("Enter new monthly average spend:");
                     double newSpend = getValidDouble();
-                    while (newSpend < 0) {
-                        System.out.println("Spend cannot be negative:");
-                        newSpend = scnr.nextDouble();
-                    }
 
                     r.setAverageSpendMonthly(newSpend);
                     System.out.println("Monthly spend updated.\n");
