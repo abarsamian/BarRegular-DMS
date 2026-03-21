@@ -26,6 +26,8 @@ public class BarRegular {
     }
 
     //setters for updating customers
+
+    public void setName(String name) { this.name = name; }
     public void setFavoriteDrink(String drink) {
         this.favoriteDrink = drink;
     }
@@ -58,5 +60,10 @@ public class BarRegular {
         System.out.println("Monthly Spend: $" + averageSpendMonthly);
         System.out.println("VIP: " + vipStatus);
         System.out.println("---------------------------");
+    }
+
+    @Override
+    public String toString(){
+        return "ID: " + customerId + ", Name: " + name;
     }
 }

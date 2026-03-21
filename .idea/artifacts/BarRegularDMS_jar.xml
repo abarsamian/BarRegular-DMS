@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="BarRegularDMS:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BarRegularDMS_jar</output-path>
+    <root id="archive" name="BarRegularDMS.jar">
+      <element id="module-output" name="BarRegularDMS" />
+    </root>
+  </artifact>
+</component>

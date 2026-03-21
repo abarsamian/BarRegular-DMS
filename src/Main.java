@@ -25,6 +25,7 @@ public class Main {
                 scnr.next();
             }
             int choice = scnr.nextInt();
+            scnr.nextLine();
 
 
             if (choice == 1) {
