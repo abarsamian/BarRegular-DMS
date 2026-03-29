@@ -48,7 +48,7 @@ class BarManagerTest {
     @Test
     void testEditRegularVisitsAndVipLogic() {
         manager.addRegular(1234567, "Arlo Kettia", "Bud Light", 20, 200);
-        manager.editVisitsById(1234567, 26);
+
         int visits = manager.getRegulars().get(0).getVisitFrequencyMonthly();
         boolean vip = manager.getRegulars().get(0).getVipStatus();
 

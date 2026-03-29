@@ -19,7 +19,8 @@ public class BarRegular {
 
         calculateVipStatus();
     }
-//vip status method is in here because every bar regular has one
+
+    //vip status method is in here because every bar regular has one
     private void calculateVipStatus() {
         vipStatus = (visitFrequencyMonthly > 25 ||
                 (averageSpendMonthly) > 1000);
@@ -27,7 +28,10 @@ public class BarRegular {
 
     //setters for updating customers
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setFavoriteDrink(String drink) {
         this.favoriteDrink = drink;
     }
@@ -43,12 +47,29 @@ public class BarRegular {
     }
 
     //getters
-    public int getCustomerId() { return customerId; }
-    public String getName() { return name; }
-    public String getFavoriteDrink() { return favoriteDrink; }
-    public int getVisitFrequencyMonthly() { return visitFrequencyMonthly; }
-    public double getAverageSpendMonthly() { return averageSpendMonthly; }
-    public boolean getVipStatus() { return vipStatus; }
+    public int getCustomerId() {
+        return customerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getFavoriteDrink() {
+        return favoriteDrink;
+    }
+
+    public int getVisitFrequencyMonthly() {
+        return visitFrequencyMonthly;
+    }
+
+    public double getAverageSpendMonthly() {
+        return averageSpendMonthly;
+    }
+
+    public boolean getVipStatus() {
+        return vipStatus;
+    }
 
 
     //display menu so we can call it whenever
@@ -63,7 +84,13 @@ public class BarRegular {
     }
 
     @Override
-    public String toString(){
-        return "ID: " + customerId + ", Name: " + name;
+
+    public String toString() {
+        return "ID: " + customerId +
+                ", Name: " + name +
+                ", Drink: " + favoriteDrink +
+                ", Visits: " + visitFrequencyMonthly +
+                ", Spend: $" + averageSpendMonthly +
+                ", VIP: " + vipStatus;
     }
 }
