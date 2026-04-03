@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -114,39 +115,34 @@ public class BarRegularGUI extends Application {
             Stage removeStage = new Stage();
             removeStage.setTitle("Remove Regular");
 
-            GridPane addGrid = new GridPane();
-            addGrid.setPadding(new Insets(20));
-            addGrid.setHgap(10);
-            addGrid.setVgap(10);
-            addGrid.setAlignment(Pos.CENTER);
+            VBox layout = new VBox(10);
+            layout.setPadding(new Insets(20));
+            layout.setAlignment(Pos.TOP_CENTER);
 
-            TextField idField = new TextField();
+            for (BarRegular r : manager.getRegulars()) {
 
-            addGrid.add(new Text("Enter ID to remove: "), 0, 0);
-            addGrid.add(idField, 1, 0);
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
 
-            Button remove = new Button("Remove");
-            addGrid.add(remove,0,2);
+                Label info = new Label(r.toString());
 
-            remove.setOnAction(event -> {
-                try {
-                    int id = Integer.parseInt(idField.getText());
-                    boolean removed = manager.removeRegularById(id);
+                Button removeBtn = new Button("Remove");
 
-                    if (removed) {
-                        output.setText("Bar Regular removed successfully.");
-                        removeStage.close();
-                    } else {
-                        output.setText("Customer not found.");
-                    }
-                } catch (NumberFormatException ex) {
-                    output.setText("Please enter a valid numeric ID.");
-                }
+                removeBtn.setOnAction(event -> {
+                    manager.removeRegularById(r.getCustomerId());
+                    output.setText("Removed: " + r.getName());
+                    removeStage.close(); // close after removal
+                });
 
-            });
+                row.getChildren().addAll(info, removeBtn);
+                layout.getChildren().add(row);
+            }
 
-            Scene removeScene = new Scene(addGrid, 300, 200);
-            removeStage.setScene(removeScene);
+            ScrollPane scrollPane = new ScrollPane(layout);
+            scrollPane.setFitToWidth(true);
+
+            Scene remscene = new Scene(scrollPane, 800, 600);
+            removeStage.setScene(remscene);
             removeStage.show();
         });
 
