@@ -1,3 +1,5 @@
+import DBHelper.DBHelper;
+import DBHelper.regulars;
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -12,13 +14,16 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class BarRegularGUI extends Application {
 
     private BarManager manager = new BarManager();
     private TextArea output = new TextArea();
+    private regulars regulars = new regulars("C:\\sqlite\\bar_regulars.db");
 
     @Override
     public void start (Stage stage){
@@ -88,15 +93,17 @@ public class BarRegularGUI extends Application {
                     String drink = drinkField.getText();
                     int visits = Integer.parseInt(visitsField.getText());
                     double spend = Double.parseDouble(spendField.getText());
+                    //this is where im adding the part where we figure out if someone is vip or not, store it as 0 or 1, and return those later
+                    int vip = (visits > 25 || spend > 1000) ? 1 : 0;
 
-                    boolean added = manager.addRegular(id, name, drink, visits, spend);
-
-                    if (added) {
+                    try {
+                        regulars.insert(id, name, drink, visits, spend, vip);
                         output.setText("Bar Regular added successfully.");
                         addStage.close();
-                    } else {
-                        output.setText("Customer ID already exists.");
+                    } catch (Exception ex) {
+                        output.setText("Error adding regular.");
                     }
+
                 } catch (NumberFormatException ex) {
                     output.setText("Please enter valid numbers for ID, visits, and spend.");
                 }
@@ -114,23 +121,33 @@ public class BarRegularGUI extends Application {
         remreg.setOnAction(e -> {
             Stage removeStage = new Stage();
             removeStage.setTitle("Remove Regular");
+            ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+            data = regulars.getExecuteResult("select * from regulars;");
+
 
             VBox layout = new VBox(10);
             layout.setPadding(new Insets(20));
             layout.setAlignment(Pos.TOP_CENTER);
 
-            for (BarRegular r : manager.getRegulars()) {
+            for (ArrayList<Object> rowData : data) {
+
+                int id = (int) rowData.get(0);
+                String name = (String) rowData.get(1);
+                String drink = (String) rowData.get(2);
+                int visits = (int) rowData.get(3);
+                double spend = (double) rowData.get(4);
+
 
                 HBox row = new HBox(10);
                 row.setAlignment(Pos.CENTER_LEFT);
 
-                Label info = new Label(r.toString());
+                Label info = new Label(id + " | " + name + " | " + drink + " | Visits: " + visits + " | $" + spend);
 
                 Button removeBtn = new Button("Remove");
 
                 removeBtn.setOnAction(event -> {
-                    manager.removeRegularById(r.getCustomerId());
-                    output.setText("Removed: " + r.getName());
+                    regulars.delete(regulars.id, String.valueOf(id));
+                    output.setText("Removed: " + name);
                     removeStage.close(); // close after removal
                 });
 
@@ -155,216 +172,239 @@ public class BarRegularGUI extends Application {
         edreg.setOnAction(e -> {
             Stage editStage = new Stage();
             editStage.setTitle("Edit Regular");
+            ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+            data = regulars.getExecuteResult("select * from regulars;");
 
-            GridPane editGrid = new GridPane();
-            editGrid.setPadding(new Insets(20));
-            editGrid.setHgap(10);
-            editGrid.setVgap(10);
-            editGrid.setAlignment(Pos.CENTER);
+            VBox layout = new VBox(10);
+            layout.setPadding(new Insets(20));
+            layout.setAlignment(Pos.TOP_CENTER);
 
-            TextField idField = new TextField();
+            for (ArrayList<Object> rowData : data) {
 
-            editGrid.add(new Text("Enter ID to edit: "), 0, 0);
-            editGrid.add(idField, 1, 0);
-
-            Button edit = new Button("Edit");
-            editGrid.add(edit, 0, 2);
-
-            edit.setOnAction(event -> {
-
-                int id;
-
-                try {
-                    id = Integer.parseInt(idField.getText());
-                } catch (NumberFormatException ex) {
-                    output.setText("Please enter a valid numeric ID.");
-                    return;
-                }
-
-                BarRegular regular = manager.findRegularById(id);
-
-                if (regular == null) {
-                    output.setText("Customer ID not found.");
-                    return;
-                }
-
-                Stage editPage = new Stage();
-                editPage.setTitle("Choose");
-
-                GridPane pageGrid = new GridPane();
-                pageGrid.setPadding(new Insets(20));
-                pageGrid.setHgap(10);
-                pageGrid.setVgap(10);
-                pageGrid.setAlignment(Pos.CENTER);
-
-                Button edName = new Button("Edit Name");
-                Button edDrink = new Button("Edit Favorite Drink");
-                Button edVis = new Button("Edit Number of Visits");
-                Button edSpend = new Button("Edit Average Monthly Spend");
+                int id = (int) rowData.get(0);
+                String name = (String) rowData.get(1);
+                String drink = (String) rowData.get(2);
+                int visits = (int) rowData.get(3);
+                double spend = (double) rowData.get(4);
 
 
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
 
-                VBox editButtonBox = new VBox(10);
-                editButtonBox.setAlignment(Pos.CENTER);
-                editButtonBox.setFillWidth(false);
+                Label info = new Label(id + " | " + name + " | " + drink + " | Visits: " + visits + " | $" + spend);
 
-                edName.setPrefWidth(220);
-                edDrink.setPrefWidth(220);
-                edVis.setPrefWidth(220);
-                edSpend.setPrefWidth(220);
+                Button editBtn = new Button("Edit");
+
+                editBtn.setOnAction(event -> {
+
+                    Stage editPage = new Stage();
+                    editPage.setTitle("Choose");
+
+                    GridPane pageGrid = new GridPane();
+                    pageGrid.setPadding(new Insets(20));
+                    pageGrid.setHgap(10);
+                    pageGrid.setVgap(10);
+                    pageGrid.setAlignment(Pos.CENTER);
+
+                    Button edName = new Button("Edit Name");
+                    Button edDrink = new Button("Edit Favorite Drink");
+                    Button edVis = new Button("Edit Number of Visits");
+                    Button edSpend = new Button("Edit Average Monthly Spend");
 
 
-                editButtonBox.getChildren().addAll(edName, edDrink, edVis, edSpend);
+                    VBox editButtonBox = new VBox(10);
+                    editButtonBox.setAlignment(Pos.CENTER);
+                    editButtonBox.setFillWidth(false);
 
-                pageGrid.add(editButtonBox, 0, 0);
-                GridPane.setHalignment(editButtonBox, HPos.CENTER);
+                    edName.setPrefWidth(220);
+                    edDrink.setPrefWidth(220);
+                    edVis.setPrefWidth(220);
+                    edSpend.setPrefWidth(220);
 
-                //buttons for editing now
 
-                edName.setOnAction(ev -> {
-                    Stage nameStage = new Stage();
-                    nameStage.setTitle("Edit Name");
+                    editButtonBox.getChildren().addAll(edName, edDrink, edVis, edSpend);
 
-                    GridPane nameGrid = new GridPane();
-                    nameGrid.setPadding(new Insets(20));
-                    nameGrid.setHgap(10);
-                    nameGrid.setVgap(10);
-                    nameGrid.setAlignment(Pos.CENTER);
+                    pageGrid.add(editButtonBox, 0, 0);
+                    GridPane.setHalignment(editButtonBox, HPos.CENTER);
 
-                    TextField newNameField = new TextField();
+                    //buttons for editing now
 
-                    nameGrid.add(new Text("New Name:"), 0, 0);
-                    nameGrid.add(newNameField, 1, 0);
+                    edName.setOnAction(ev -> {
+                        Stage nameStage = new Stage();
+                        nameStage.setTitle("Edit Name");
 
-                    Button saveName = new Button("Save");
-                    nameGrid.add(saveName, 1, 1);
+                        GridPane nameGrid = new GridPane();
+                        nameGrid.setPadding(new Insets(20));
+                        nameGrid.setHgap(10);
+                        nameGrid.setVgap(10);
+                        nameGrid.setAlignment(Pos.CENTER);
 
-                    saveName.setOnAction(saveEvent -> {
-                        String newName = newNameField.getText();
-                        regular.setName(newName);
-                        output.setText("Name updated successfully.");
-                        nameStage.close();
-                        editPage.close();
-                        editStage.close();
-                    });
+                        TextField newNameField = new TextField();
 
-                    Scene nameScene = new Scene(nameGrid, 300, 150);
-                    nameStage.setScene(nameScene);
-                    nameStage.show();
-                });
+                        nameGrid.add(new Text("New Name:"), 0, 0);
+                        nameGrid.add(newNameField, 1, 0);
 
-                edDrink.setOnAction(ev -> {
-                    Stage drinkStage = new Stage();
-                    drinkStage.setTitle("Edit Favorite Drink");
+                        Button saveName = new Button("Save");
+                        nameGrid.add(saveName, 1, 1);
 
-                    GridPane drinkGrid = new GridPane();
-                    drinkGrid.setPadding(new Insets(20));
-                    drinkGrid.setHgap(10);
-                    drinkGrid.setVgap(10);
-                    drinkGrid.setAlignment(Pos.CENTER);
+                        saveName.setOnAction(saveEvent -> {
+                            String newName = newNameField.getText();
 
-                    TextField newDrinkField = new TextField();
-
-                    drinkGrid.add(new Text("New Favorite Drink:"), 0, 0);
-                    drinkGrid.add(newDrinkField, 1, 0);
-
-                    Button saveDrink = new Button("Save");
-                    drinkGrid.add(saveDrink, 1, 1);
-
-                    saveDrink.setOnAction(saveEvent -> {
-                        String newDrink = newDrinkField.getText();
-                        regular.setFavoriteDrink(newDrink);
-                        output.setText("Favorite drink updated successfully.");
-                        drinkStage.close();
-                        editPage.close();
-                        editStage.close();
-                    });
-
-                    Scene drinkScene = new Scene(drinkGrid, 320, 150);
-                    drinkStage.setScene(drinkScene);
-                    drinkStage.show();
-                });
-
-                edVis.setOnAction(ev -> {
-                    Stage visitsStage = new Stage();
-                    visitsStage.setTitle("Edit Number of Visits");
-
-                    GridPane visitsGrid = new GridPane();
-                    visitsGrid.setPadding(new Insets(20));
-                    visitsGrid.setHgap(10);
-                    visitsGrid.setVgap(10);
-                    visitsGrid.setAlignment(Pos.CENTER);
-
-                    TextField newVisitsField = new TextField();
-
-                    visitsGrid.add(new Text("New Monthly Visits:"), 0, 0);
-                    visitsGrid.add(newVisitsField, 1, 0);
-
-                    Button saveVisits = new Button("Save");
-                    visitsGrid.add(saveVisits, 1, 1);
-
-                    saveVisits.setOnAction(saveEvent -> {
-                        try {
-                            int newVisits = Integer.parseInt(newVisitsField.getText());
-                            regular.setVisitFrequencyMonthly(newVisits);
-                            output.setText("Monthly visits updated successfully.");
-                            visitsStage.close();
+                            regulars.update(
+                                    regulars.name,
+                                    newName,
+                                    regulars.id,
+                                    String.valueOf(id)
+                            );
+                            output.setText("Name updated successfully.");
+                            nameStage.close();
                             editPage.close();
                             editStage.close();
-                        } catch (NumberFormatException ex) {
-                            output.setText("Please enter a valid number for visits.");
-                        }
+                        });
+
+                        Scene nameScene = new Scene(nameGrid, 300, 150);
+                        nameStage.setScene(nameScene);
+                        nameStage.show();
                     });
 
-                    Scene visitsScene = new Scene(visitsGrid, 320, 150);
-                    visitsStage.setScene(visitsScene);
-                    visitsStage.show();
-                });
+                    edDrink.setOnAction(ev -> {
+                        Stage drinkStage = new Stage();
+                        drinkStage.setTitle("Edit Favorite Drink");
 
-                edSpend.setOnAction(ev -> {
-                    Stage spendStage = new Stage();
-                    spendStage.setTitle("Edit Monthly Spend");
+                        GridPane drinkGrid = new GridPane();
+                        drinkGrid.setPadding(new Insets(20));
+                        drinkGrid.setHgap(10);
+                        drinkGrid.setVgap(10);
+                        drinkGrid.setAlignment(Pos.CENTER);
 
-                    GridPane spendGrid = new GridPane();
-                    spendGrid.setPadding(new Insets(20));
-                    spendGrid.setHgap(10);
-                    spendGrid.setVgap(10);
-                    spendGrid.setAlignment(Pos.CENTER);
+                        TextField newDrinkField = new TextField();
 
-                    TextField newSpendField = new TextField();
+                        drinkGrid.add(new Text("New Favorite Drink:"), 0, 0);
+                        drinkGrid.add(newDrinkField, 1, 0);
 
-                    spendGrid.add(new Text("New Monthly Spend:"), 0, 0);
-                    spendGrid.add(newSpendField, 1, 0);
+                        Button saveDrink = new Button("Save");
+                        drinkGrid.add(saveDrink, 1, 1);
 
-                    Button saveSpend = new Button("Save");
-                    spendGrid.add(saveSpend, 1, 1);
-
-                    saveSpend.setOnAction(saveEvent -> {
-                        try {
-                            double newSpend = Double.parseDouble(newSpendField.getText());
-                            regular.setAverageSpendMonthly(newSpend);
-                            output.setText("Monthly spend updated successfully.");
-                            spendStage.close();
+                        saveDrink.setOnAction(saveEvent -> {
+                            String newDrink = newDrinkField.getText();
+                            regulars.update(
+                                    regulars.favorite_drink,
+                                    newDrink,
+                                    regulars.id,
+                                    String.valueOf(id)
+                            );
+                            output.setText("Favorite drink updated successfully.");
+                            drinkStage.close();
                             editPage.close();
                             editStage.close();
-                        } catch (NumberFormatException ex) {
-                            output.setText("Please enter a valid number for spend.");
-                        }
+                        });
+
+                        Scene drinkScene = new Scene(drinkGrid, 320, 150);
+                        drinkStage.setScene(drinkScene);
+                        drinkStage.show();
                     });
 
-                    Scene spendScene = new Scene(spendGrid, 320, 150);
-                    spendStage.setScene(spendScene);
-                    spendStage.show();
+                    edVis.setOnAction(ev -> {
+                        Stage visitsStage = new Stage();
+                        visitsStage.setTitle("Edit Number of Visits");
+
+                        GridPane visitsGrid = new GridPane();
+                        visitsGrid.setPadding(new Insets(20));
+                        visitsGrid.setHgap(10);
+                        visitsGrid.setVgap(10);
+                        visitsGrid.setAlignment(Pos.CENTER);
+
+                        TextField newVisitsField = new TextField();
+
+                        visitsGrid.add(new Text("New Monthly Visits:"), 0, 0);
+                        visitsGrid.add(newVisitsField, 1, 0);
+
+                        Button saveVisits = new Button("Save");
+                        visitsGrid.add(saveVisits, 1, 1);
+
+                        saveVisits.setOnAction(saveEvent -> {
+                            try {
+                                int newVisits = Integer.parseInt(newVisitsField.getText());
+                                // get current spend from rowData
+                                double currentSpend = (double) rowData.get(4);
+
+                                int vip = (newVisits > 25 || currentSpend > 1000) ? 1 : 0;
+
+                                // update BOTH fields
+                                regulars.update(regulars.visits, String.valueOf(newVisits), regulars.id, String.valueOf(id));
+                                regulars.update(regulars.vip_status, String.valueOf(vip), regulars.id, String.valueOf(id));
+                                output.setText("Monthly visits updated successfully.");
+                                visitsStage.close();
+                                editPage.close();
+                                editStage.close();
+                            } catch (NumberFormatException ex) {
+                                output.setText("Please enter a valid number for visits.");
+                            }
+                        });
+
+                        Scene visitsScene = new Scene(visitsGrid, 320, 150);
+                        visitsStage.setScene(visitsScene);
+                        visitsStage.show();
+                    });
+
+                    edSpend.setOnAction(ev -> {
+                        Stage spendStage = new Stage();
+                        spendStage.setTitle("Edit Monthly Spend");
+
+                        GridPane spendGrid = new GridPane();
+                        spendGrid.setPadding(new Insets(20));
+                        spendGrid.setHgap(10);
+                        spendGrid.setVgap(10);
+                        spendGrid.setAlignment(Pos.CENTER);
+
+                        TextField newSpendField = new TextField();
+
+                        spendGrid.add(new Text("New Monthly Spend:"), 0, 0);
+                        spendGrid.add(newSpendField, 1, 0);
+
+                        Button saveSpend = new Button("Save");
+                        spendGrid.add(saveSpend, 1, 1);
+
+                        saveSpend.setOnAction(saveEvent -> {
+                            try {
+                                double newSpend = Double.parseDouble(newSpendField.getText());
+
+                                // get current visits from rowData
+                                int currentVisits = (int) rowData.get(3);
+
+                                int vip = (currentVisits > 25 || newSpend > 1000) ? 1 : 0;
+
+                                regulars.update(regulars.total_spent, String.valueOf(newSpend), regulars.id, String.valueOf(id));
+                                regulars.update(regulars.vip_status, String.valueOf(vip), regulars.id, String.valueOf(id));
+
+                                output.setText("Monthly spend updated successfully.");
+                                spendStage.close();
+                                editPage.close();
+                                editStage.close();
+                            } catch (NumberFormatException ex) {
+                                output.setText("Please enter a valid number for spend.");
+                            }
+                        });
+
+                        Scene spendScene = new Scene(spendGrid, 320, 150);
+                        spendStage.setScene(spendScene);
+                        spendStage.show();
+                    });
+
+                    Scene editPageScene = new Scene(pageGrid, 320, 250);
+                    editPage.setScene(editPageScene);
+                    editPage.show();
                 });
 
-                Scene editPageScene = new Scene(pageGrid, 320, 250);
-                editPage.setScene(editPageScene);
-                editPage.show();
-            });
+                row.getChildren().addAll(info, editBtn);
+                layout.getChildren().add(row);
+            }
+                ScrollPane scrollPane = new ScrollPane(layout);
+                scrollPane.setFitToWidth(true);
 
-            Scene editScene = new Scene(editGrid, 350, 180);
-            editStage.setScene(editScene);
-            editStage.show();
+                Scene editScene = new Scene(scrollPane, 800, 600);
+                editStage.setScene(editScene);
+                editStage.show();
 
             });
 
@@ -373,33 +413,70 @@ public class BarRegularGUI extends Application {
         Button viewregs = new Button("View all Bar Regulars");
 
         viewregs.setOnAction(e ->{
-            output.setText(manager.getAllRegularsText());
+            ArrayList<ArrayList<Object>> data = regulars.getExecuteResult("SELECT * FROM regulars;");
+
+            StringBuilder sb = new StringBuilder();
+
+            for (ArrayList<Object> row : data) {
+                int id = (int) row.get(0);
+                String name = (String) row.get(1);
+                String drink = (String) row.get(2);
+                int visits = (int) row.get(3);
+                double spend = (double) row.get(4);
+
+                sb.append(id)
+                        .append(" | ")
+                        .append(name)
+                        .append(" | ")
+                        .append(drink)
+                        .append(" | Visits: ")
+                        .append(visits)
+                        .append(" | $")
+                        .append(spend)
+                        .append("\n");
+            }
+            output.setText(sb.toString());
         });
 
 
-
-                //VIEW VIP REGULARS
+                // VIEW ONLY VIP REGULARS
         Button viewVIP = new Button("View all VIP Bar Regulars");
+
         viewVIP.setOnAction(e -> {
-            output.setText(manager.getVipRegularsText());
+            ArrayList<ArrayList<Object>> data =
+                    regulars.getExecuteResult("SELECT * FROM regulars WHERE vip_status = 1;");
+
+            StringBuilder sb1 = new StringBuilder();
+
+            for (ArrayList<Object> row : data) {
+                sb1.append(row.get(0)).append(" | ")
+                        .append(row.get(1)).append(" | ")
+                        .append(row.get(2)).append(" | Visits: ")
+                        .append(row.get(3)).append(" | $")
+                        .append(row.get(4)).append("\n");
+            }
+
+            output.setText(sb1.toString());
         });
 
 
-        Button loadfile = new Button("Load Regulars from file");
-        loadfile.setOnAction(e -> {
+
+        Button loadDB = new Button("Load Database");
+
+        loadDB.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open Bar Regular File");
+            fileChooser.setTitle("Select SQLite Database");
+
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("SQLite Database", "*.db")
+            );
 
             File selectedFile = fileChooser.showOpenDialog(stage);
 
             if (selectedFile != null) {
-                boolean success = manager.loadFromFile(selectedFile.getAbsolutePath());
-
-                if (success) {
-                    output.setText("Loaded bar regulars from file successfully.");
-                } else {
-                    output.setText("Error reading file.");
-                }
+                String path = selectedFile.getAbsolutePath();
+                regulars = new regulars(selectedFile.getAbsolutePath()); // recreate object if needed
+                output.setText("Database loaded from: " + path);
             }
         });
 
@@ -416,13 +493,13 @@ public class BarRegularGUI extends Application {
         edreg.setPrefWidth(200);
         viewregs.setPrefWidth(200);
         viewVIP.setPrefWidth(200);
-        loadfile.setPrefWidth(200);
+        loadDB.setPrefWidth(200);
         exitBtn.setPrefWidth(200);
 
         grid.add(scenetitle,0,0,2,1);
         VBox buttonBox = new VBox(10);
         buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.getChildren().addAll(addreg,remreg,edreg,viewregs,viewVIP,loadfile, exitBtn);
+        buttonBox.getChildren().addAll(addreg,remreg,edreg,viewregs,viewVIP, loadDB, exitBtn);
         grid.add(buttonBox,0,1, 2, 1);
         GridPane.setHalignment(buttonBox, HPos.CENTER);
         grid.setGridLinesVisible(false);
