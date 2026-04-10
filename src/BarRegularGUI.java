@@ -21,10 +21,13 @@ import java.util.Scanner;
 
 public class BarRegularGUI extends Application {
 
-    private BarManager manager = new BarManager();
     private TextArea output = new TextArea();
     private regulars regulars = new regulars("C:\\sqlite\\bar_regulars.db");
 
+    /**
+     * This is the starting stage where I set the grid for the main menu of the DMS.
+     * @param stage the stage we are going to return
+     */
     @Override
     public void start (Stage stage){
         setUserAgentStylesheet(STYLESHEET_CASPIAN);
@@ -47,6 +50,7 @@ public class BarRegularGUI extends Application {
         output.setPromptText("Output will appear here...");
 
                     //ADD REGULAR BUTTON AND FUNCTIONALITY
+
 
         Button addreg = new Button("Add Regular");
 
